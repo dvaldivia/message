@@ -15,6 +15,10 @@ func main() {
 
 	argsWithoutProg := os.Args[1:]
 
+	http.HandleFunc("/", echo)
+	http.HandleFunc("/live", live)
+	http.HandleFunc("/ready", ready)
+
 	if len(argsWithoutProg) > 0 {
 		srvStr := argsWithoutProg[0]
 		if ellipses.HasEllipses(srvStr) {
@@ -26,8 +30,6 @@ func main() {
 				checkServers = append(checkServers, volumeMountPath...)
 			}
 		}
-
-		http.HandleFunc("/", echo)
 
 		go func() {
 			http.ListenAndServe(":8090", nil)
@@ -55,17 +57,26 @@ func main() {
 		}
 
 	} else {
-		http.HandleFunc("/", echo)
 		http.ListenAndServe(":8090", nil)
-
 	}
-
 }
 
 func echo(w http.ResponseWriter, req *http.Request) {
-	message := "default"
+	message := "default\n"
 	if os.Getenv("MESSAGE") != "" {
 		message = os.Getenv("MESSAGE")
 	}
 	fmt.Fprintf(w, message)
+}
+
+func ready(w http.ResponseWriter, req *http.Request) {
+	message := "ready\n"
+	fmt.Fprintf(w, message)
+	log.Println("ready hit 😎")
+}
+
+func live(w http.ResponseWriter, req *http.Request) {
+	message := "live\n"
+	fmt.Fprintf(w, message)
+	log.Println("live hit 😼")
 }
